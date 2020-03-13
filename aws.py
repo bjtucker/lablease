@@ -28,10 +28,12 @@ def get_expired_instances(ec2):
 def lambda_handler(event, context):
     logger.info('Received event: ' + json.dumps(event))
     result = ""
-    ec2 = boto3.resource('ec2', region_name='us-east-1')
-    expired_instances = get_expired_instances(ec2)
-    for instance in expired_instances:
-        result += terminate_instance(instance)
+    regions = ['us-east-1','us-east-2']
+    for region in regions:
+        ec2 = boto3.resource('ec2', region_name=region)
+        expired_instances = get_expired_instances(ec2)
+        for instance in expired_instances:
+            result += terminate_instance(instance)
 
     if result is not "":
         sns.publish(PhoneNumber=phone_number, Message="lablease Deleted instances:" + result)
