@@ -8,17 +8,26 @@ logger.setLevel(logging.INFO)
 
 sns = boto3.client('sns')
 phone_number = '16127502017'  # change it to your phone number
+default_lease_minutes = 180
 
 def terminate_instance(instance):
     message = "terminating:" + instance.id +" "+ instance.state['Name'] +"  "
     instance.terminate()
     return message
 
+def get_lease(instance):
+    tags_dict = {t['Key']: t['Value'] for t in instance.tags}
+    try:
+        lease_minutes = tags_dict['lease_minutes']
+    except KeyError:
+        lease_minutes = default_lease_minutes
+
 def get_expired_instances(ec2):
     expired_instances = []
-    killtime = datetime.timedelta(minutes=180)
     instances = ec2.instances.all()
     for instance in instances:
+        lease_minutes = get_lease(instance)
+        killtime = datetime.timedelta(minutes=lease_minutes)
         tz = instance.launch_time.tzinfo
         datetime_now = datetime.datetime.now(tz)
         if datetime_now - instance.launch_time > killtime:
