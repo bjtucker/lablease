@@ -12,6 +12,7 @@ default_lease_minutes = 180
 
 
 def terminate_instance(instance):
+
     logger.info("Terminating instance: " + instance.id)
     message = "terminating:" + instance.id + " " + instance.state["Name"] + "  "
     instance.terminate()
@@ -19,6 +20,7 @@ def terminate_instance(instance):
 
 
 def get_lease(instance):
+
     logger.info("Checking lease for instance: " + instance.id)
     tags_dict = {t["Key"]: t["Value"] for t in instance.tags}
     try:
@@ -27,7 +29,6 @@ def get_lease(instance):
         lease_minutes = default_lease_minutes
     logger.info("Lease: " + str(datetime.timedelta(minutes=lease_minutes)))
     return lease_minutes
-
 
 def get_expired_instances(ec2):
     expired_instances = []
@@ -41,6 +42,7 @@ def get_expired_instances(ec2):
         logger.info("Time running: " + str(time_running))
         time_remaining = killtime - time_running
         logger.info("Time remaining: " + str(time_remaining))
+
 
         if time_remaining < datetime.timedelta(minutes=0):
             expired_instances.append(instance)
